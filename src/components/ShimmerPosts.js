@@ -14,7 +14,6 @@ function ShimmerPosts() {
                         <div className="bg-gray-300 w-24 h-4 rounded"></div>
                     </div>
 
-                    {/* Title */}
                     <div className="mb-2">
                         <div className="bg-gray-300 w-3/4 h-6 rounded mb-2"></div>
                         <div className="bg-gray-300 w-full h-4 rounded mb-4"></div>

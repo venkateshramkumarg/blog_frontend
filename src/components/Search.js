@@ -21,8 +21,9 @@ function Search() {
                 throw new Error('Network response was not ok');
             }
             const datas = await response.json();
+            console.log(datas);
             setData(datas);
-            setFilteredData(datas); // Initialize filteredData with the fetched data
+            setFilteredData(datas);
         } catch (error) {
             console.error('Fetch error:', error);
         }
@@ -31,7 +32,6 @@ function Search() {
     const handleChange = (e) => {
         const query = e.target.value;
         setSearch(query);
-        // Filter the data based on the search query
         const filtered = data.filter((item) => item.title.toLowerCase().includes(query.toLowerCase()));
         setFilteredData(filtered);
     };

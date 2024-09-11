@@ -4,6 +4,7 @@ import { useState } from "react";
 function LandingPage() {
     const navigate = useNavigate();
     const [login, setLogin] = useState({ user_name: '', password: '' });
+    const [error,setError]=useState({user_name:'',password:''})
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -21,11 +22,24 @@ function LandingPage() {
             });
             const data = await response.json();
             console.log(data);
-            if (data.message === 'Login Successful') {
+            if (data.message === 'Login Successful') 
+            {
                 sessionStorage.setItem("sessionStorage", JSON.stringify({ user_name: login.user_name }));
                 navigate('/posts');
             }
-        } catch (error) {
+            else if(data.message === 'Invalid Password')
+                {
+                setError((prev)=>({...prev,password:data.message}))
+            }
+            else if(data.message === 'User not found')
+            {
+                console.log('User not found');
+                
+                setError((prev)=>({...prev,user_name:data.message}))
+            }
+        } 
+        catch (error) 
+        {
             console.error('Login error:', error);
         }
     };
@@ -40,18 +54,22 @@ function LandingPage() {
                         <input
                             type="text"
                             name='user_name'
+                            onFocus={()=>setError((prev)=>({...prev, user_name:''}))}
                             onChange={handleChange}
-                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className={`w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${error.user_name ? 'ring-2 ring-red-500' : 'focus:ring-blue-500'}`}
                         />
+                        {error.user_name && <p className="text-red-500 text-sm mt-1">{error.user_name}</p>}
                     </div>
                     <div className="mb-6">
                         <label htmlFor="password" className="block text-sm font-semibold mb-1 text-gray-600">Password</label>
                         <input
                             type="password"
                             name='password'
+                            onFocus={()=>setError((prev)=>({...prev, password:''}))}
                             onChange={handleChange}
-                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className={`w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${error.password ? 'ring-2 ring-red-500' : 'focus:ring-blue-500'}`}
                         />
+                        {error.password && <p className="text-red-500 text-sm mt-1">{error.password}</p>}
                     </div>
                     <button
                         type="submit"

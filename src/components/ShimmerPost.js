@@ -3,7 +3,6 @@ import React from 'react';
 function ShimmerPost() {
     return (
         <div className="max-w-2xl mx-auto p-4">
-            {/* Header */}
             <div className="bg-white p-4 border border-gray-300 shadow-md rounded-md mb-5 animate-pulse">
                 <div className="flex justify-between items-center border-b border-gray-400 pb-4 mb-4">
                     <div className="flex items-center w-36 justify-start gap-3">
@@ -30,7 +29,6 @@ function ShimmerPost() {
                 </div>
             </div>
 
-            {/* Comments Section */}
             <div className="bg-white p-4 border border-gray-300 shadow-md rounded-md mb-5 animate-pulse">
                 <h2 className="bg-gray-300 w-1/3 h-6 rounded mb-5"></h2>
                 <div className="mb-5">
@@ -41,7 +39,6 @@ function ShimmerPost() {
                 <div className="bg-gray-300 w-full h-12 rounded-md"></div>
             </div>
 
-            {/* Single Comment Placeholder */}
             <div className="bg-white p-4 border border-gray-300 shadow-md rounded-md mb-5 animate-pulse">
                 <div className="flex justify-between mb-2 items-center">
                     <div className="flex items-center gap-3">

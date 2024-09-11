@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { AiOutlineLike, AiOutlineDislike, AiFillLike, AiFillDislike } from "react-icons/ai";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link } from 'react-router-dom';
-import NavBar from './NavBar';
 import ShimmerPost from './ShimmerPost';
 
 function Post() {
@@ -22,9 +21,13 @@ function Post() {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
+            console.log(data.comments);
+            console.log(data)
             setPost({
                 ...data,
-                userInteraction: data.liked_by.some(user => user.user_name === user_name) ? 'like' : 'none'
+                userInteraction: data.liked_by.some(user => user.user_name === user_name) ? 'like' 
+                                 : data.disliked_by.some(user => user.user_name === user_name) ? 'dislike'
+                                 : 'none'
             });
         } catch (error) {
             console.error('Fetch error:', error);
@@ -56,56 +59,93 @@ function Post() {
         }
     }
 
-    const handleInteraction = async (interactionType) => {
+
+    const handleInteraction = async (interactionType) => 
+    {
         if (!post) return;
 
-        let endpoint, newInteraction, likesChange;
+        let endpoint1,endpoint2 ,newInteraction, likesChange = 0, dislikesChange = 0;
 
         if (interactionType === 'like') {
-            endpoint = 'http://localhost:3000/api/posts/like';
             if (post.userInteraction === 'like') {
+                endpoint1 = 'http://localhost:3000/api/posts/decrement/like';
                 newInteraction = 'none';
                 likesChange = -1;
             } else {
+                endpoint1 = 'http://localhost:3000/api/posts/increment/like';
+                if(post.userInteraction=='dislike')
+                {
+                    endpoint2='http://localhost:3000/api/posts/decrement/dislike'
+                }
                 newInteraction = 'like';
-                likesChange = post.userInteraction === 'dislike' ? 1 : 1;
+                likesChange = 1;
+                if (post.userInteraction === 'dislike') {
+                    dislikesChange = -1;
+                }
             }
         } else {
-            endpoint = 'http://localhost:3000/api/posts/dislike';
             if (post.userInteraction === 'dislike') {
+                endpoint1 = 'http://localhost:3000/api/posts/decrement/dislike';
                 newInteraction = 'none';
-                likesChange = 0;
+                dislikesChange = -1;
             } else {
+                endpoint1 = 'http://localhost:3000/api/posts/increment/dislike';
+                console.log('inside dislike1');
+                if(post.userInteraction=='like')
+                {   console.log('inside dislike2');
+                
+                    endpoint2='http://localhost:3000/api/posts/decrement/like'
+                }
                 newInteraction = 'dislike';
-                likesChange = post.userInteraction === 'like' ? -1 : 0;
+                dislikesChange = 1;
+                if (post.userInteraction === 'like') {
+                    likesChange = -1;
+                }
             }
         }
 
+        setPost(prevPost => ({
+            ...prevPost,
+            likes: prevPost.likes + likesChange,
+            dislikes: prevPost.dislikes + dislikesChange,
+            userInteraction: newInteraction,
+            liked_by: newInteraction === 'like'
+                ? [...prevPost.liked_by, { user_name: user_name }]
+                : prevPost.liked_by.filter(user => user.user_name !== user_name),
+            disliked_by: newInteraction === 'dislike'
+                ? [...prevPost.disliked_by, { user_name: user_name }]
+                : prevPost.disliked_by.filter(user => user.user_name !== user_name)
+        }));
+
         try {
-            const response = await fetch(endpoint, {
+            const response1 = await fetch(endpoint1, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ post_id: post.id, user_name: user_name })
             });
-            const result = await response.json();
-            if (result.message === "Post Liked" || result.message === "Post Disliked") {
-                setPost(prevPost => ({
-                    ...prevPost,
-                    likes: prevPost.likes + likesChange,
-                    dislikes: newInteraction === 'dislike' ? prevPost.dislikes + 1 : 
-                              prevPost.userInteraction === 'dislike' ? prevPost.dislikes - 1 : 
-                              prevPost.dislikes,
-                    userInteraction: newInteraction,
-                    liked_by: newInteraction === 'like'
-                        ? [...prevPost.liked_by, { user_name: user_name }]
-                        : prevPost.liked_by.filter(user => user.user_name !== user_name)
-                }));
-            }
+            const result1 = await response1.json();
+            console.log(result1.message);
         } catch (error) {
             console.error(`Error ${interactionType}ing post:`, error);
         }
-    };
+        if(endpoint2)
+            {
+                try {
+                    console.log(post.id,user_name);
+                    
+                    const response2 = await fetch(endpoint2, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ post_id: post.id, user_name: user_name })
+                    });
+                    const result2 = await response2.json();
+                    console.log(result2.message);
+                } catch (error) {
+                    console.error(`Error ${interactionType}ing post:`, error);
+                }  
+            }
 
+    };
     const getRelativeTime = (isoDate) => {
         const now = new Date();
         const date = new Date(isoDate);
@@ -132,7 +172,6 @@ function Post() {
     if (!post) {
         return (
             <div>
-                <NavBar />
                 <ShimmerPost />
             </div>
         );
@@ -140,14 +179,13 @@ function Post() {
 
     return (
         <div>
-            <NavBar />
-            <div className='max-w-2xl bg-white mx-auto mb-5'>
+            <div className='max-w-2xl bg-white mx-auto mb-5 mt-5'>
                 <div className='mb-7'>
                     <Link className='hover:underline text-blue-500 flex items-center gap-1' to='/posts'>{<FaArrowLeft className='size-4' />}Back to Posts</Link>
                 </div>
                 <div className='flex justify-between items-center border-b border-gray-400 pb-4 mb-4'>
                     <div className='flex items-center w-36 justify-start gap-3'>
-                        <img src="https://t4.ftcdn.net/jpg/02/32/98/33/360_F_232983351_z5CAl79bHkm6eMPSoG7FggQfsJLxiZjY.jpg" alt="" className='size-8 rounded-full' />
+                        <img src={post.User.avatar_url} alt="" className='size-8 rounded-full' />
                         <h2 className='text-xl font-semibold'>{post.user_name}</h2>
                     </div>
                     <div>
@@ -193,7 +231,7 @@ function Post() {
                     <div key={index} className='max-w-2xl bg-white mx-auto p-4 border border-gray-300 shadow-md rounded-md mb-5'>
                         <div className='flex justify-between mb-2 items-center'>
                             <div className='flex items-center gap-3'>
-                                <img src="https://t4.ftcdn.net/jpg/02/32/98/33/360_F_232983351_z5CAl79bHkm6eMPSoG7FggQfsJLxiZjY.jpg" alt="" className='size-8 rounded-full' />
+                                <img src={comment.User.avatar_url} alt="" className='size-8 rounded-full' />
                                 <h2 className='text-base text-gray-400'>{comment.user_name}</h2>
                             </div>
                             <div>

@@ -1,15 +1,27 @@
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { AvatarGenerator } from 'random-avatar-generator';
 
 function SignUp() {
     const navigate = useNavigate();
     const [login, setLogin] = useState({ user_name: '', password: '', confirm_password: '' });
     const [error, setError] = useState({ user_name: '', password: '' });
+    const [avatars, setAvatars] = useState([]);
+    const [selectedAvatar, setSelectedAvatar] = useState(null);
+
+    useEffect(() => {
+        const generator = new AvatarGenerator();
+        const newAvatars = Array.from({ length: 10 }, () => generator.generateRandomAvatar());
+        setAvatars(newAvatars);
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setLogin((prev) => ({ ...prev, [name]: value }));
-        console.log(login);
+    };
+
+    const handleAvatarSelect = (avatar) => {
+        setSelectedAvatar(avatar);
     };
 
     const handleSubmit = async (e) => {
@@ -18,11 +30,19 @@ function SignUp() {
             setError((prev) => ({ ...prev, password: 'Passwords do not match' }));
             return;
         }
+        if (!selectedAvatar) {
+            alert('Please select an avatar');
+            return;
+        }
         try {
+            console.log(selectedAvatar)
             const response = await fetch('http://localhost:3000/api/users/register', {
                 method: 'POST',
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_name: login.user_name, password: login.password })
+                body: JSON.stringify({ 
+                    user_name: login.user_name, 
+                    password: login.password,
+                })
             });
             const data = await response.json();
             if (data.message === 'User Created') {
@@ -70,6 +90,20 @@ function SignUp() {
                             className={`w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${error.password ? 'ring-2 ring-red-500' : 'focus:ring-blue-500'}`}
                         />
                         {error.password && <p className="text-red-500 text-sm mt-1">{error.password}</p>}
+                    </div>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold mb-2 text-gray-600">Select Avatar</label>
+                        <div className="grid grid-cols-5 gap-2">
+                            {avatars.map((avatar, index) => (
+                                <img
+                                    key={index}
+                                    src={avatar}
+                                    alt={`Avatar ${index + 1}`}
+                                    className={`w-12 h-12 cursor-pointer border-2 rounded-full ${selectedAvatar === avatar ? 'border-blue-500' : 'border-transparent'}`}
+                                    onClick={() => handleAvatarSelect(avatar)}
+                                />
+                            ))}
+                        </div>
                     </div>
                     <button
                         type="submit"
