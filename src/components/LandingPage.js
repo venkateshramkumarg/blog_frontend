@@ -14,6 +14,19 @@ function LandingPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!login.user_name||!login.password) 
+        {
+            if (!login.user_name) 
+            {
+                setError((prev) => ({ ...prev, user_name: 'User Name is required' }));
+            }
+            if (!login.password)
+            {
+                setError((prev) => ({ ...prev, password: 'Password is required' }));
+            }
+            return;
+        }
+
         try {
             const response = await fetch('http://localhost:3000/api/users/login', {
                 method: 'POST',
@@ -28,13 +41,11 @@ function LandingPage() {
                 navigate('/posts');
             }
             else if(data.message === 'Invalid Password')
-                {
+            {
                 setError((prev)=>({...prev,password:data.message}))
             }
             else if(data.message === 'User not found')
-            {
-                console.log('User not found');
-                
+            {   
                 setError((prev)=>({...prev,user_name:data.message}))
             }
         } 

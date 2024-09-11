@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import NavBar from "./NavBar";
+import { Link } from 'react-router-dom';
 
 function Search() {
     const [data, setData] = useState([]);
     const [search, setSearch] = useState('');
     const [filteredData, setFilteredData] = useState([]);
+    const sessionData = JSON.parse(sessionStorage.getItem('sessionStorage') || '{}'); 
+    const { user_name } = sessionData;
 
     useEffect(() => {
         fetchData();
@@ -36,10 +39,30 @@ function Search() {
         setFilteredData(filtered);
     };
 
-    return (
+    return user_name===undefined?(
+        <div className='max-w-md mx-auto mb-5 sm:max-w-2xl text-center mt-5'>
+            <h1 className='text-3xl font-bold mb-5 text-red-600'>Login Required</h1>
+            <p className='text-lg mb-4'>Please login to search posts.</p>
+            <Link to='/' className='text-blue-500 underline hover:text-blue-700 text-xl'>Login</Link>
+        </div>
+    ):search==''?(
         <div>
             <NavBar />
-            <div className="mx-auto max-w-2xl p-4">
+            <div className="mx-auto max-w-2xl">
+                <input 
+                    type="text" 
+                    placeholder="Search for Title" 
+                    onChange={handleChange}
+                    value={search}
+                    className="w-full border border-gray-400 p-2 rounded-md mb-4" 
+                />
+                <p>Search to view post</p>
+            </div>
+        </div>
+    ): (
+        <div>
+            <NavBar />
+            <div className="mx-auto max-w-2xl">
                 <input 
                     type="text" 
                     placeholder="Search for Title" 

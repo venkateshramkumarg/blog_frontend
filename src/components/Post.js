@@ -9,7 +9,9 @@ function Post() {
     const { id } = useParams();
     const [post, setPost] = useState(null); 
     const [comment, setComment] = useState('');
-    const { user_name } = JSON.parse(sessionStorage.getItem('sessionStorage'));
+    const [error, setError] = useState({ comment: '' });
+    const sessionData = JSON.parse(sessionStorage.getItem('sessionStorage') || '{}'); 
+    const { user_name } = sessionData;
 
     const fetchData = async () => {
         try {
@@ -44,6 +46,14 @@ function Post() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if(!comment)
+        {
+            setError((prev) => ({
+                ...prev,
+                comment:'Comment is required',
+            }));
+            return;
+        }
         try {
             const response = await fetch('http://localhost:3000/api/comments/create', {
                 method: "POST",
@@ -169,15 +179,19 @@ function Post() {
         }
     };
 
-    if (!post) {
-        return (
-            <div>
-                <ShimmerPost />
-            </div>
-        );
-    }
-
-    return (
+    return user_name===undefined?(
+        <div className='max-w-md mx-auto mb-5 sm:max-w-2xl text-center mt-5'>
+            <h1 className='text-3xl font-bold mb-5 text-red-600'>Login Required</h1>
+            <p className='text-lg mb-4'>Please login to view post.</p>
+            <Link to='/' className='text-blue-500 underline hover:text-blue-700 text-xl'>Login</Link>
+        </div>
+        
+    ):!post?(
+        <div>
+            <ShimmerPost />
+        </div>
+    ):
+    (
         <div>
             <div className='max-w-2xl bg-white mx-auto mb-5 mt-5'>
                 <div className='mb-7'>
@@ -193,7 +207,17 @@ function Post() {
                     </div>
                 </div>
                 <h2 className='font-bold text-2xl mb-4'>{post.title}</h2>
-                <p className='mb-4'>{post.content}</p>
+                <div className='flex justify-center mb-4'>
+                        {post.image && (
+                                <img 
+                                    src={post.image} 
+                                    alt="Post image" 
+                                    className="w-full h-auto mt-2"
+                                />
+                            )}
+                    
+                </div>
+                <p className='mb-4 overscroll-contain'>{post.content}</p>
                 <div className='flex justify-between items-center'>
                     <div className='flex gap-3 items-center'>
                         <div className='flex items-center'>
@@ -217,10 +241,13 @@ function Post() {
                 <div className='mb-5'>
                     <form onSubmit={handleSubmit}>
                         <textarea 
-                            className='w-full ring-2 ring-gray-400 p-2 rounded-md focus:outline-none focus:ring-blue-500' 
+                            className={`w-full border border-gray-300 p-2 rounded-md focus:ring-2 focus:outline-none h-24 ${error.comment ? 'border-red-500' : 'focus:border-blue-500'}`}
                             onChange={handleChange}
                             value={comment}
+                            placeholder='Write a comment...'
+                            onFocus={() => setError((prev) => ({ ...prev, comment: '' }))}
                         ></textarea>
+                        {error.comment && <p className='text-red-500'>{error.comment}</p>}
                         <button className='bg-blue-500 text-white rounded-md px-3 py-2 font-semibold mt-5'>Post Comment</button>
                     </form>
                 </div>

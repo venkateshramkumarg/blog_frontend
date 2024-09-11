@@ -10,7 +10,8 @@ function Posts() {
     const [loadMore,setLoadMore]=useState(true)
     const [page, setPage] = useState(1);
     const [noPost,setNoPost]=useState(false)
-    const { user_name } = JSON.parse(sessionStorage.getItem('sessionStorage'));
+    const sessionData = JSON.parse(sessionStorage.getItem('sessionStorage') || '{}'); 
+    const { user_name } = sessionData;
 
     useEffect(() => {
         fetchData(page);
@@ -29,6 +30,14 @@ function Posts() {
             {
                 setLoadMore(false)
             }
+            else if(data.length===0)
+            {
+                setNoPost(true)
+                console.log("No Post");
+                return
+                    
+            }
+            console.log("Post Present");
             if (Array.isArray(data)) {
                 setPosts(prevPosts => [...prevPosts, ...data.map(post => ({
                     ...post,
@@ -36,10 +45,6 @@ function Posts() {
                                      : post.disliked_by.some(user => user.user_name === user_name) ? 'dislike'
                                      : 'none'
                 }))]);
-            }
-            else if(data=="Return No Post")
-            {
-                setNoPost(true)
             }
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -157,17 +162,24 @@ function Posts() {
         }
     };
 
-    return posts.length === 0 ? (
-        <div className='max-w-md mx-auto mb-5 sm:max-w-2xl'>
-            <NavBar />
-            <ShimmerPosts />
+    return user_name===undefined ? (
+        <div className='max-w-md mx-auto mb-5 sm:max-w-2xl text-center mt-5'>
+            <h1 className='text-3xl font-bold mb-5 text-red-600'>Login Required</h1>
+            <p className='text-lg mb-4'>Please login to view posts.</p>
+            <Link to='/' className='text-blue-500 underline hover:text-blue-700 text-xl'>Login</Link>
         </div>
-    ) : noPost === true ? (
+    )
+    :noPost===true?(
         <div className='max-w-md mx-auto mb-5 sm:max-w-2xl'>
             <NavBar />
             <p>No posts available.</p>
         </div>
-
+    ):
+    posts.length === 0 ? (
+        <div className='max-w-md mx-auto mb-5 sm:max-w-2xl'>
+            <NavBar />
+            <ShimmerPosts />
+        </div>
     ) :(
         <div className='max-w-md mx-auto mb-5 sm:max-w-2xl'>
             <NavBar />
@@ -183,14 +195,20 @@ function Posts() {
 
                 <div className='mb-2'>
                     <Link className='font-bold text-2xl hover:underline' to={`/${post.id}`}>{post.title}</Link>
-                    {post.image && (
-                            <img 
-                                src={post.image} 
-                                alt="Post image" 
-                                className="w-full h-auto object-cover rounded-md mb-4"
-                            />
-                        )}
-                    <p className='mb-4 w-full max-h-40 overflow-auto text-gray-700 tracking-wide p-2 leading-6 text-base'>{post.content}</p>
+                    <div className='flex justify-center mb-2'>
+                        {post.image && (
+                                <img 
+                                    src={post.image} 
+                                    alt="Post image" 
+                                    className="w-[200px] h-[150px] mt-2 rounded-lg"
+                                />
+                            )}
+                    
+                    </div>
+                    <div className='mt-2'>
+                        <p className='mb-4 w-full max-h-40 overflow-auto  text-gray-700 tracking-wide p-2 leading-6 text-base'>{post.content}</p>
+                    </div>
+                    
                 </div>
 
                 <div className='flex justify-between items-center border-b border-gray-200 pb-2'>
