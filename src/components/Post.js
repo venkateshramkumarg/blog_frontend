@@ -15,7 +15,7 @@ function Post() {
 
     const fetchData = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/api/posts/post/${id}`, {
+            const response = await fetch(`https://blog-backend-final.onrender.com/api/posts/post/${id}`, {
                 method: "GET",
                 headers: { 'Content-Type': 'application/json' }
             });
