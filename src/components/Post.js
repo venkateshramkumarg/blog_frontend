@@ -55,7 +55,7 @@ function Post() {
             return;
         }
         try {
-            const response = await fetch('http://localhost:3000/api/comments/create', {
+            const response = await fetch('https://blog-backend-final.onrender.com/api/comments/create', {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: comment, post_id: post.id, user_name: user_name })

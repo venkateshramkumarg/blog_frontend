@@ -35,24 +35,27 @@ function WritePost() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!data.title) 
+        if (!data.title||!data.content) 
         {
-            setError((prev) => ({
-                ...prev,
-                title:'Title is required',
-            }));
-        }
-        if(!data.content)
-        {
-            setError((prev) => ({
-                ...prev,
-                content:'Content is required',
-            }));
+            if(!data.title)
+            {
+                setError((prev) => ({
+                    ...prev,
+                    title:'Title is required',
+                }));
+            }
+            if(!data.content)
+            {
+                setError((prev) => ({
+                    ...prev,
+                    content:'Content is required',
+                }));
+            }
             return;
         }
         console.log(data)
         try {
-            const response = await fetch("http://localhost:3000/api/posts/create", {
+            const response = await fetch("https://blog-backend-final.onrender.com/api/posts/create", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data)

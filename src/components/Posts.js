@@ -19,7 +19,7 @@ function Posts() {
 
     const fetchData = async (page) => {
         try {
-            const response = await fetch('http://localhost:3000/api/posts/limit/all', {
+            const response = await fetch('https://blog-backend-final.onrender.com/api/posts/limit/all', {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ page: page, limit: 2 })

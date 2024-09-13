@@ -27,8 +27,6 @@ function SignUp() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("here")
-        console.log(login)
         if(!selectedAvatar||!login.user_name||!login.password||!login.confirm_password){
             if(!login.user_name){
                 setError((prev) => ({ ...prev, user_name: 'User Name is required' }));
@@ -48,35 +46,28 @@ function SignUp() {
             }
             return;
         }
+
+        if(login.password.length<8||login.confirm_password.length<8||login.user_name.length>20||login.password!==login.confirm_password)
+        {
+            if(login.user_name.length>20){
+                setError((prev) => ({ ...prev, user_name: 'User Name must be less than 20 characters' }));
+            }
+            if(login.password.length<8){
+
+            setError((prev) => ({ ...prev, password: 'Password must be at least 8 characters',confirm_password:'Password must be at least 8 characters' }));
+            return
+            }
+            
+            if(login.password!==login.confirm_password){
+                setError((prev) => ({ ...prev, confirm_password: 'Passwords do not match' }));
+            }
+            return;
+        }
+
         console.log("here")
-
-        if(login.password.length<8){
-            setError((prev) => ({ ...prev, password: 'Password must be at least 8 characters' }));
-            return;
-        }
-        if(login.confirm_password.length<8){
-            setError((prev) => ({ ...prev,confirm_password:'Password must be at least 8 characters' }));
-            return;
-        }
-
-        if(login.user_name.length<3){
-            setError((prev) => ({ ...prev, user_name: 'User Name must be at least 3 characters' }));
-            return;
-        }
-        if(login.user_name.length>20){
-            setError((prev) => ({ ...prev, user_name: 'User Name must be at most 20 characters' }));
-            return;
-        }
-
-
-        if (login.password !== login.confirm_password) {
-            setError((prev) => ({ ...prev, password: 'Passwords do not match' ,confirm_password:'Passwords do not match' }));
-            return;
-        }
-
         try {
             console.log(selectedAvatar)
-            const response = await fetch('http://localhost:3000/api/users/register', {
+            const response = await fetch('https://blog-backend-final.onrender.com/api/users/register', {
                 method: 'POST',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
